@@ -57,6 +57,26 @@ except FileNotFoundError:
         create_demo_pickles()
         st.success("Demo models created. Please reload the app to use them.")
     st.stop()
+except ModuleNotFoundError as e:
+    import re
+    st.title("Spam Message Checker")
+    msg = str(e)
+    m = re.search(r"No module named '([^']+)'", msg)
+    missing = m.group(1) if m else msg
+    st.error(f"The model depends on a Python module that is not available in this environment: `{missing}`.")
+    st.markdown("**Possible fixes:**")
+    st.markdown(f"- Add `{missing}` (and its version) to `requirements.txt` and redeploy (e.g. `pip install {missing}`).")
+    st.markdown("- Recreate the pickles in an environment that has the required packages and redeploy the new pickles.")
+    st.markdown("- Use `joblib`/`cloudpickle` to re-serialize the model with compatible versions if needed.")
+    if st.button("Show full error details"):
+        st.exception(e)
+    st.stop()
+except Exception as e:
+    st.title("Spam Message Checker")
+    st.error("Error loading model files: " + str(e))
+    if st.button("Show full error details"):
+        st.exception(e)
+    st.stop()
 
 st.title("Spam Message Checker")
 email_input= st.text_input("Enter the message")
